@@ -79,7 +79,6 @@ public class Bomb : MonoBehaviour {
         Vector2 pos = transform.position;
         Instantiate(explosion,transform.position, Quaternion.identity);
         Block.destroyBlockAt(pos.x, pos.y);
-        destroyables = GameObject.FindGameObjectsWithTag("Destroyable");
         Debug.Log(count);
         for (int i = 1; i <= count; i++)
         {
@@ -122,6 +121,8 @@ public class Bomb : MonoBehaviour {
                 Block.destroyBlockAt(pos.x - i, pos.y);
                 SpawnPowerUp(pos.x - i, pos.y);
             }
+            destroyables = GameObject.FindGameObjectsWithTag("Destroyable");
+
         }
     }
     void OnTriggerEnter2D(Collider2D other)
