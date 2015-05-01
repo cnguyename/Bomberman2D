@@ -8,11 +8,6 @@ public class Move : MonoBehaviour {
 
     Animator anim;
 
-	public AudioClip fire_powerup;
-	public AudioClip speed_powerup;
-	public AudioClip bomb_powerup;
-	public AudioClip step_sound;
-
     public GameObject bman1;
     public GameObject bman2;
     public GameObject bman3;
@@ -23,7 +18,7 @@ public class Move : MonoBehaviour {
     public SynchronousClient client;
     
 
-	private AudioSource source;
+	public AudioSource source;
 
     void Start() {
         bombermans = new GameObject[4];
@@ -62,24 +57,4 @@ public class Move : MonoBehaviour {
         bombermans[client.PlayerIndex].transform.Translate(dir);
     }
 
-	void OnTriggerEnter2D(Collider2D other)
-	{
-		if (other.gameObject.tag == "PickUpFlame") {
-			source.PlayOneShot (fire_powerup);
-			other.gameObject.SetActive (false);
-            Debug.Log("before");
-            Debug.Log(Bomb.count);
-			Bomb.count += 1;
-            Debug.Log("after");
-            Debug.Log(Bomb.count);
-		} else if (other.gameObject.tag == "PickUpSpeed") {
-			source.PlayOneShot (speed_powerup);
-			other.gameObject.SetActive (false);
-			speed += 0.015f;
-		} else if (other.gameObject.tag == "PickUpLimit") {
-			source.PlayOneShot (bomb_powerup);
-			other.gameObject.SetActive (false);
-			BombDrop.bomb_limit += 1;
-		}
-	}
 }

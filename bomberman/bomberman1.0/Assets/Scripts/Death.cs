@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Death : MonoBehaviour {
 
-    private AudioSource source;
+    public AudioSource source;
 
     public AudioClip fire_powerup;
     public AudioClip speed_powerup;
@@ -17,6 +17,7 @@ public class Death : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         Character = mover.GetComponent<Move>();
+        source = GetComponent<AudioSource>();
 	}
 	
 	// Update is called once per frame
