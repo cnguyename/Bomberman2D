@@ -2,16 +2,46 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
+
+public class ClientConnection
+{
+    byte[] bytes = new Byte[1024];
+    Socket handler;
+    string data;
+
+    public ClientConnection(Socket s){
+        handler = s;
+    }
+
+    public void ReceivingThread(){
+        // Data buffer for incoming data.
+        while (true) {
+            int bytesRec = handler.Receive(bytes);
+            data = Encoding.ASCII.GetString(bytes,0,bytesRec);
+
+            //Data handler thread.
+            Thread dh = new Thread(new ThreadStart(DataHandler));
+            dh.Start();
+        }
+    }
+
+    public void DataHandler(){
+        // Show the data on the console.
+        Console.WriteLine( "Text received : {0}", data);
+
+        // Echo the data back to the client.
+        byte[] msg = Encoding.ASCII.GetBytes(data); //change data string to bytes for the message
+        handler.Send(msg); // send the bytes
+
+    }
+}
+
 
 public class SynchronousSocketListener {
-    
-    // Incoming data from the client.
-    public static string data = null;
 
     public static void StartListening() {
-        // Data buffer for incoming data.
-        byte[] bytes = new Byte[1024];
-
+        
         // Establish the local endpoint for the socket.
         // Dns.GetHostName returns the name of the 
         // host running the application.
@@ -34,36 +64,16 @@ public class SynchronousSocketListener {
                 Console.WriteLine("Waiting for a connection...");
                 // Program is suspended while waiting for an incoming connection.
                 Socket handler = listener.Accept();
-                data = null;
-
+                
                 // An incoming connection needs to be processed.
-                while (true) {
-                    bytes = new byte[1024];
-                    int bytesRec = handler.Receive(bytes);
-                    data += Encoding.ASCII.GetString(bytes,0,bytesRec);
-                    if (data.IndexOf("<EOF>") > -1) {
-                        break;
-                    }
-                }
-
-                // Show the data on the console.
-                Console.WriteLine( "Text received : {0}", data);
-
-                // Echo the data back to the client.
-                byte[] msg = Encoding.ASCII.GetBytes(data);
-
-                handler.Send(msg);
-                //handler.Shutdown(SocketShutdown.Both);
-                //handler.Close();
+                ClientConnection cc = new ClientConnection(handler);
+                Thread t = new Thread(new ThreadStart(cc.ReceivingThread));
+                t.Start();
             }
             
         } catch (Exception e) {
             Console.WriteLine(e.ToString());
         }
-
-        Console.WriteLine("\nPress ENTER to continue...");
-        Console.Read();
-        
     }
 
     public static int Main(String[] args) {

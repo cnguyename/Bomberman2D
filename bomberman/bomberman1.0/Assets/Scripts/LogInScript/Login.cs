@@ -146,7 +146,9 @@ public class Login : MonoBehaviour
             string[] LogTextSplit = LogText.Split(':');
             if (LogTextSplit[0] == "Success")
             {
-                Application.LoadLevel("Corey_Scene"); // SELECT LEVEL after successfully login
+				SynchronousClient.PlayerName = username;
+                Application.LoadLevel("scene_main"); // SELECT LEVEL after successfully login
+
             }
         }
     }

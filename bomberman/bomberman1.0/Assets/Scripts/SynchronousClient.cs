@@ -6,13 +6,20 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
+using System.Threading;
+
 public class SynchronousClient : MonoBehaviour {
 
-    public int PlayerIndex; // must be 0-3
+	//Player Index (of array)
+	//Player 1, 2, 3, 4 = index 0, 1, 2, 3 respectively.
+    public int PlayerIndex;
 
-	
+	public static string PlayerName;
+	//what needs to be sent over unity?
+	//players movement + position, bomb placements, map updates, powerups, score
+
 	public class SynchronousSocketClient {
-
+		public Socket sender;
 		public SynchronousSocketClient(){
 
 		}
@@ -30,18 +37,16 @@ public class SynchronousClient : MonoBehaviour {
 				IPEndPoint remoteEP = new IPEndPoint(ipAddress,11000);
 				
 				// Create a TCP/IP  socket.
-				Socket sender = new Socket(AddressFamily.InterNetwork, 
+				sender = new Socket(AddressFamily.InterNetwork, 
 				                           SocketType.Stream, ProtocolType.Tcp );
 				
 				// Connect the socket to the remote endpoint. Catch any errors.
 				try {
 					sender.Connect(remoteEP);
-					
-					print("Socket connected to {0}"+
-					                  sender.RemoteEndPoint.ToString());
+					print("Socket connected to {0}" + sender.RemoteEndPoint.ToString());
 					
 					// Encode the data string into a byte array.
-					byte[] msg = Encoding.ASCII.GetBytes("Today is 04/29/2015!<EOF>");
+					byte[] msg = Encoding.ASCII.GetBytes(PlayerName + " has successfully connected<EOF>");
 					
 					// Send the data through the socket.
 					int bytesSent = sender.Send(msg);
@@ -50,11 +55,12 @@ public class SynchronousClient : MonoBehaviour {
 					int bytesRec = sender.Receive(bytes);
 					print("Echoed test = {0}"+
 					                  Encoding.ASCII.GetString(bytes,0,bytesRec));
+
+					MessageListener ml = new MessageListener(sender);
+					Thread t = new Thread(new ThreadStart(ml.ReceivingThread));
+               		t.Start();
 					
-					// Release the socket.
-					//sender.Shutdown(SocketShutdown.Both);
-					//sender.Close();
-					
+
 				} catch (ArgumentNullException ane) {
 					print("ArgumentNullException : {0}" + ane.ToString());
 				} catch (SocketException se) {
@@ -66,14 +72,55 @@ public class SynchronousClient : MonoBehaviour {
 			} catch (Exception e) {
 				print( e.ToString());
 			}
-		}
-		
+		}		
+	}
 
+	public class MessageListener{
+		public MessageListener(){
+
+		}
+
+		byte[] bytes = new Byte[1024];
+	    Socket sender;
+	    string data;
+
+	    public MessageListener(Socket s){
+	        sender = s;
+	    }
+
+	    public void ReceivingThread(){
+	        // Data buffer for incoming data.
+	        while (true) {
+	            int bytesRec = sender.Receive(bytes);
+	            data = Encoding.ASCII.GetString(bytes,0,bytesRec);
+	            
+	            //Data handler thread.
+	            Thread dh = new Thread(new ThreadStart(DataHandler));
+	            dh.Start();
+	        }
+    	}
+
+    	public void DataHandler(){
+        	// Show the data on the console.
+        	print( "Echoed Text received : {0}"+ data);
+    	}
 	}
+
+	public SynchronousSocketClient synch_client = new SynchronousSocketClient ();
+
 	// Use this for initialization
-	void Start () {
-		SynchronousSocketClient synch_client = new SynchronousSocketClient ();
+	void Start () {		
 		synch_client.StartClient ();
-	
 	}
+
+	public int timer = 1;
+
+	void Update() {
+		if (timer % 5 == 0){
+			byte[] msg = Encoding.ASCII.GetBytes("Scooby Doo<EOF>");
+			synch_client.sender.Send(msg);
+			timer = 1;
+		}
+		timer++;
+	}	
 }
