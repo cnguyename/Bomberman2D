@@ -17,8 +17,8 @@ public class Login : MonoBehaviour
     public string CurrentMenu = "Login";
 
     //Private
-    private string CreateAccountUrl = "http://127.0.0.1/CreateAccountT.php";
-    private string LoginUrl = "http://127.0.0.1/LoginAccountT.php";
+    private string CreateAccountUrl = "http://192.168.0.110/CreateAccountT.php";
+    private string LoginUrl = "http://192.168.0.110/LoginAccountT.php";
 
     private string ConfirmPass = "";
     private string Cusername = ""; //New
@@ -148,7 +148,6 @@ public class Login : MonoBehaviour
             {
 				SynchronousClient.PlayerName = username;
                 Application.LoadLevel("scene_main"); // SELECT LEVEL after successfully login
-
             }
         }
     }

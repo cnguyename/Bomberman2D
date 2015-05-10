@@ -56,8 +56,8 @@
      <Compile Include="Assets\Scripts\LogInScript\Login.cs" />
      <Compile Include="Assets\Scripts\MainMenu.cs" />
      <Compile Include="Assets\Scripts\Move.cs" />
-     <Compile Include="Assets\Scripts\ScoreScript.cs" />
      <Compile Include="Assets\Scripts\SynchronousClient.cs" />
+     <Compile Include="Assets\Scripts\Username.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

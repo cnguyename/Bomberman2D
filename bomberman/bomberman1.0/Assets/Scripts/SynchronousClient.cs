@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 using System;
 using System.Net;
@@ -8,119 +9,287 @@ using System.Text;
 
 using System.Threading;
 
-public class SynchronousClient : MonoBehaviour {
+public class SynchronousClient : MonoBehaviour
+{
 
-	//Player Index (of array)
-	//Player 1, 2, 3, 4 = index 0, 1, 2, 3 respectively.
+    //Player Index (of array)
+    //Player 1, 2, 3, 4 = index 0, 1, 2, 3 respectively.
     public int PlayerIndex;
 
-	public static string PlayerName;
-	//what needs to be sent over unity?
-	//players movement + position, bomb placements, map updates, powerups, score
+    public static string strPlayerIndex;
 
-	public class SynchronousSocketClient {
-		public Socket sender;
-		public SynchronousSocketClient(){
+    public static string PlayerName;
 
-		}
-		
-		public void StartClient() {
-			// Data buffer for incoming data.
-			byte[] bytes = new byte[1024];
-			
-			// Connect to a remote device.
-			try {
-				// Establish the remote endpoint for the socket.
-				// This example uses port 11000 on the local computer.
-				IPHostEntry ipHostInfo = Dns.Resolve(Dns.GetHostName());
-				IPAddress ipAddress = ipHostInfo.AddressList[0];
-				IPEndPoint remoteEP = new IPEndPoint(ipAddress,11000);
-				
-				// Create a TCP/IP  socket.
-				sender = new Socket(AddressFamily.InterNetwork, 
-				                           SocketType.Stream, ProtocolType.Tcp );
-				
-				// Connect the socket to the remote endpoint. Catch any errors.
-				try {
-					sender.Connect(remoteEP);
-					print("Socket connected to {0}" + sender.RemoteEndPoint.ToString());
-					
-					// Encode the data string into a byte array.
-					byte[] msg = Encoding.ASCII.GetBytes(PlayerName + " has successfully connected<EOF>");
-					
-					// Send the data through the socket.
-					int bytesSent = sender.Send(msg);
-					
-					// Receive the response from the remote device.
-					int bytesRec = sender.Receive(bytes);
-					print("Echoed test = {0}"+
-					                  Encoding.ASCII.GetString(bytes,0,bytesRec));
+    public GameObject bomberman;
 
-					MessageListener ml = new MessageListener(sender);
-					Thread t = new Thread(new ThreadStart(ml.ReceivingThread));
-               		t.Start();
-					
+    public GameObject[] bombermans;
+    public GameObject bman1;
+    public GameObject bman2;
+    public GameObject bman3;
+    public GameObject bman4;
+    public Animator anim;
+    public AudioSource source;
 
-				} catch (ArgumentNullException ane) {
-					print("ArgumentNullException : {0}" + ane.ToString());
-				} catch (SocketException se) {
-					print("SocketException : {0}" + se.ToString());
-				} catch (Exception e) {
-					print("Unexpected exception : {0}" + e.ToString());
+	public GameObject bomb_client_prefab;
+    //hold position updates for bomberman clients
+    public static Vector3[] positions = new Vector3[4]; 
+
+	
+	public static Queue<Vector2> q_of_bombs = new Queue<Vector2>();
+
+    //what needs to be sent over unity?
+    //players movement + position, bomb placements, map updates, powerups, score
+
+    public class SynchronousSocketClient
+    {
+        public Socket sender;
+		public GameObject b_prefab;
+
+        public SynchronousSocketClient(GameObject go)
+        {
+			b_prefab = go;
+        }
+
+        public void StartClient()
+        {
+            // Data buffer for incoming data.
+            byte[] bytes = new byte[1024];
+
+            // Connect to a remote device.
+            try
+            {
+                // Establish the remote endpoint for the socket.
+                // This example uses port 11000 on the local computer.
+                IPHostEntry ipHostInfo = Dns.Resolve(Dns.GetHostName());
+                IPAddress ipAddress = IPAddress.Parse("192.168.1.13");
+                //IPAddress ipAddress = ipHostInfo.AddressList[0];
+                IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
+
+                // Create a TCP/IP  socket.
+                sender = new Socket(AddressFamily.InterNetwork,
+                                           SocketType.Stream, ProtocolType.Tcp);
+
+                // Connect the socket to the remote endpoint. Catch any errors.
+                try
+                {
+                    sender.Connect(remoteEP);
+                    print("Socket connected to {0}" + sender.RemoteEndPoint.ToString());
+
+                    // Encode the data string into a byte array.
+                    byte[] msg = Encoding.ASCII.GetBytes(PlayerName + " has successfully connected<EOF>");
+
+
+                    // Send the data through the socket.
+                    int bytesSent = sender.Send(msg);
+
+                    // Receive the response from the remote device.
+                    int bytesRec = sender.Receive(bytes);
+                    print("Echoed test = {0}" +
+                                      Encoding.ASCII.GetString(bytes, 0, bytesRec));
+                    strPlayerIndex = Encoding.ASCII.GetString(bytes, 0, bytesRec);
+
+                    MessageListener ml = new MessageListener(sender, b_prefab);
+                    Thread t = new Thread(new ThreadStart(ml.ReceivingThread));
+                    t.Start();
+
+                    //Data handler thread.
+                    Thread dh = new Thread(new ThreadStart(ml.DataHandler));
+                    dh.Start();
+
+
+                }
+                catch (ArgumentNullException ane)
+                {
+                    print("ArgumentNullException : {0}" + ane.ToString());
+                }
+                catch (SocketException se)
+                {
+                    print("SocketException : {0}" + se.ToString());
+                }
+                catch (Exception e)
+                {
+                    print("Unexpected exception : {0}" + e.ToString());
+                }
+
+            }
+            catch (Exception e)
+            {
+                print(e.ToString());
+            }
+        }
+    }
+
+    public class MessageListener
+    {
+
+        public bool msg_received = false;
+        byte[] bytes = new Byte[1024];
+        Socket sender;
+        String data;
+        Queue dataQ = new Queue();
+        AutoResetEvent lock_thread = new AutoResetEvent(false);
+        char playernum;
+		GameObject bomb_prefab;
+
+
+        public MessageListener(Socket s, GameObject go)
+        {
+            sender = s;
+            playernum = strPlayerIndex[0];
+			bomb_prefab = go;
+        }
+
+        //blocking collection
+        //take
+        public void ReceivingThread()
+        {
+            // Data buffer for incoming data.
+            while (true)
+            {
+                int bytesRec = sender.Receive(bytes);
+                data = Encoding.ASCII.GetString(bytes, 0, bytesRec);
+
+                dataQ.Enqueue(data);
+                lock_thread.Set();
+
+
+            }
+        }
+
+        //receive data from server
+        public void DataHandler()
+        {
+            Vector3 pos;
+            while (true)
+            {
+                // Show the data on the console.
+                 
+                lock_thread.WaitOne();
+                string msg = (string)dataQ.Dequeue();
+                //check if playerindex is not equal to this clients playerindex
+             
+				if (msg[0] != playernum && msg != " has successfully connected<EOF>" && msg[1] != 'B')
+                {
+                    //split up the message
+                    string[] split = msg.Split(new Char[] { '/', '(', ')', ',' });
+                    //get x,y,z to create vector 3
+                    pos.x = Single.Parse(split[1].Trim());
+                    pos.y = Single.Parse(split[2].Trim());
+                    pos.z = Single.Parse(split[3].Trim());
+                    print(pos);
+                    //store new position into positions array
+                    positions[Convert.ToInt32(split[0])] = pos;
+                    
+                }
+
+				if(msg[0] != playernum && msg[1] == 'B'){
+					string[] split = msg.Split(new Char[] { '/', '(', ')', ',' });
+					Vector2 bomb_pos = new Vector2(Single.Parse (split[2].Trim()), Single.Parse (split[3].Trim()));
+					Vector3 bomb_position = new Vector3(bomb_pos.x, bomb_pos.y, 0);
+					GameObject.Instantiate(bomb_prefab, bomb_position, Quaternion.identity);
 				}
-				
-			} catch (Exception e) {
-				print( e.ToString());
-			}
-		}		
-	}
+            }
+        }
+    }
 
-	public class MessageListener{
-		public MessageListener(){
+    public SynchronousSocketClient synch_client;
+    public Vector2 self_position;
+    public float self_x, self_y, self_z;
 
+    // Use this for initialization
+    void Start()
+    {
+        
+
+        bombermans = new GameObject[4];
+        bombermans[0] = bman1;
+        bombermans[1] = bman2;
+        bombermans[2] = bman3;
+        bombermans[3] = bman4;
+
+
+
+        synch_client = new SynchronousSocketClient(bomb_client_prefab);
+        synch_client.StartClient();
+        //check x, y, z
+        // <0
+        if (strPlayerIndex.StartsWith("0"))
+        {
+            bomberman = bombermans[0];
+            PlayerIndex = 0;
+            anim = bombermans[0].GetComponent<Animator>();
+            source = bombermans[0].GetComponent<AudioSource>();
+        }
+        else if (strPlayerIndex.StartsWith("1"))
+        {
+            bomberman = bombermans[1];
+            PlayerIndex = 1;
+            anim = bombermans[1].GetComponent<Animator>();
+            source = bombermans[1].GetComponent<AudioSource>();
+        }
+        else if (strPlayerIndex.StartsWith("2"))
+        {
+            bomberman = bombermans[2];
+            PlayerIndex = 2;
+            anim = bombermans[2].GetComponent<Animator>();
+            source = bombermans[2].GetComponent<AudioSource>();
+        }
+        else if (strPlayerIndex.StartsWith("3"))
+        {
+            bomberman = bombermans[3];
+            PlayerIndex = 3;
+            anim = bombermans[3].GetComponent<Animator>();
+            source = bombermans[3].GetComponent<AudioSource>();
+        }
+        Vector2 self_position = bomberman.transform.position;
+        self_x = bomberman.transform.position.x;
+        self_y = bomberman.transform.position.y;
+
+        //initialize bomberman objects positions
+        for (int i = 0; i < 4; ++i)
+        {
+            positions[i] = bombermans[i].transform.position;
+        }
+    }
+
+    public int timer = 0;
+    public float curr_x, curr_y, curr_z;
+
+
+    void Update()
+    {
+        if (timer % 5 == 0)
+        {
+            Vector2 current_position = bomberman.transform.position;
+            curr_x = bomberman.transform.position.x;
+            curr_y = bomberman.transform.position.y;
+            if (Math.Abs(self_x - curr_x) > .1 || Math.Abs(self_y - curr_y) > .1 || Math.Abs(self_z - curr_z) > .1)
+            {
+                byte[] msg = Encoding.ASCII.GetBytes(PlayerIndex.ToString() + bomberman.transform.position.ToString() + "<EOF>");
+                synch_client.sender.Send(msg);
+                self_position = current_position;
+                self_x = curr_x;
+                self_y = curr_y;
+            }
+            timer = 1;
+        }
+        timer++;
+
+        //update positions for other bombermans
+        for (int i = 0; i < 4; ++i)
+        {
+            if (i != PlayerIndex)
+            {
+                bombermans[i].transform.position = positions[i];
+
+            }
+        }
+		/*
+		if (q_of_bombs.Count != 0) {
+			Vector2 bomb_p = q_of_bombs.Dequeue ();
+			Vector3 bomb_position = new Vector3(bomb_p.x, bomb_p.y, 0);
+			Instantiate(bomb_client_prefab, bomb_position, Quaternion.identity);
 		}
-
-		byte[] bytes = new Byte[1024];
-	    Socket sender;
-	    string data;
-
-	    public MessageListener(Socket s){
-	        sender = s;
-	    }
-
-	    public void ReceivingThread(){
-	        // Data buffer for incoming data.
-	        while (true) {
-	            int bytesRec = sender.Receive(bytes);
-	            data = Encoding.ASCII.GetString(bytes,0,bytesRec);
-	            
-	            //Data handler thread.
-	            Thread dh = new Thread(new ThreadStart(DataHandler));
-	            dh.Start();
-	        }
-    	}
-
-    	public void DataHandler(){
-        	// Show the data on the console.
-        	print( "Echoed Text received : {0}"+ data);
-    	}
-	}
-
-	public SynchronousSocketClient synch_client = new SynchronousSocketClient ();
-
-	// Use this for initialization
-	void Start () {		
-		synch_client.StartClient ();
-	}
-
-	public int timer = 1;
-
-	void Update() {
-		if (timer % 5 == 0){
-			byte[] msg = Encoding.ASCII.GetBytes("Scooby Doo<EOF>");
-			synch_client.sender.Send(msg);
-			timer = 1;
-		}
-		timer++;
-	}	
+		*/
+    }
 }

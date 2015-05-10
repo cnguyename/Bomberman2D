@@ -4,79 +4,120 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
+using System.Collections;
+using System.Collections.Generic;
+
 public class ClientConnection
 {
     byte[] bytes = new Byte[1024];
     Socket handler;
+    List<Socket> list_of_clients;
     string data;
+    Queue dataQ = new Queue();
+    AutoResetEvent lock_thread = new AutoResetEvent(false);
+    int players_connected;
 
-    public ClientConnection(Socket s){
+    public ClientConnection(Socket s, int ps_connected, List<Socket> a)
+    {
         handler = s;
+        players_connected = ps_connected;
+        list_of_clients = a;
     }
 
-    public void ReceivingThread(){
+    public void ReceivingThread()
+    {
         // Data buffer for incoming data.
-        while (true) {
+        while (true)
+        {
             int bytesRec = handler.Receive(bytes);
-            data = Encoding.ASCII.GetString(bytes,0,bytesRec);
+            data = Encoding.ASCII.GetString(bytes, 0, bytesRec);
 
-            //Data handler thread.
-            Thread dh = new Thread(new ThreadStart(DataHandler));
-            dh.Start();
+            dataQ.Enqueue(data);
+            lock_thread.Set();
+
         }
     }
 
-    public void DataHandler(){
-        // Show the data on the console.
-        Console.WriteLine( "Text received : {0}", data);
+    //send from server to client
+    public void DataHandler()
+    {
 
-        // Echo the data back to the client.
-        byte[] msg = Encoding.ASCII.GetBytes(data); //change data string to bytes for the message
-        handler.Send(msg); // send the bytes
+        while (true)
+        {
+            // Show the data on the console.
+            lock_thread.WaitOne();
+            Console.WriteLine("Text received: {0}", dataQ.Peek());
+            if ((string)dataQ.Peek() == " has successfully connected<EOF>" && players_connected <= 3)
+            {
+                //players_connected++;
+                byte[] player_index = Encoding.ASCII.GetBytes(players_connected.ToString() + "<EOF>");
+                handler.Send(player_index);
+                Console.WriteLine(players_connected);
 
+            }
+            // Echo the data back to the client.
+            string byte_str = (string)dataQ.Dequeue();
+            byte[] msg = Encoding.ASCII.GetBytes(byte_str); //change data string to bytes for the message
+            //handler.Send(msg); // send the bytes
+            foreach (Socket s in list_of_clients)
+            {
+                s.Send(msg);
+            }
+        }
     }
 }
 
 
-public class SynchronousSocketListener {
+public class SynchronousSocketListener
+{
 
-    public static void StartListening() {
-        
-        // Establish the local endpoint for the socket.
-        // Dns.GetHostName returns the name of the 
-        // host running the application.
+    public static int ps = 0;
+    public static List<Socket> client_list = new List<Socket>();
+
+    public static void StartListening()
+    {
         IPHostEntry ipHostInfo = Dns.Resolve(Dns.GetHostName());
         IPAddress ipAddress = ipHostInfo.AddressList[0];
         IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 11000);
 
         // Create a TCP/IP socket.
         Socket listener = new Socket(AddressFamily.InterNetwork,
-            SocketType.Stream, ProtocolType.Tcp );
-
-        // Bind the socket to the local endpoint and 
-        // listen for incoming connections.
-        try {
+            SocketType.Stream, ProtocolType.Tcp);
+        try
+        {
             listener.Bind(localEndPoint);
             listener.Listen(10);
-
+            //int players_connected = -1;
             // Start listening for connections.
-            while (true) {
+            while (true)
+            {
                 Console.WriteLine("Waiting for a connection...");
                 // Program is suspended while waiting for an incoming connection.
                 Socket handler = listener.Accept();
-                
+
+                client_list.Add(handler);
+
                 // An incoming connection needs to be processed.
-                ClientConnection cc = new ClientConnection(handler);
+                ClientConnection cc = new ClientConnection(handler, ps, client_list);
                 Thread t = new Thread(new ThreadStart(cc.ReceivingThread));
                 t.Start();
+
+                //Data handler thread.
+                Thread dh = new Thread(new ThreadStart(cc.DataHandler));
+                dh.Start();
+
+                ps++;
             }
-            
-        } catch (Exception e) {
+
+        }
+        catch (Exception e)
+        {
             Console.WriteLine(e.ToString());
         }
     }
 
-    public static int Main(String[] args) {
+    public static int Main(String[] args)
+    {
         StartListening();
         return 0;
     }
