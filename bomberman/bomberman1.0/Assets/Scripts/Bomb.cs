@@ -31,8 +31,7 @@ public class Bomb : MonoBehaviour {
     public GameObject[] destroyables;
     public float rnd;
 
-
-
+	
     void Start()
     {
         destroyables = GameObject.FindGameObjectsWithTag("Destroyable");
