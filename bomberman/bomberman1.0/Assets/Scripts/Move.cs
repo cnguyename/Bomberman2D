@@ -7,12 +7,10 @@ public class Move : MonoBehaviour {
     public GameObject ClientObject;
 
     public SynchronousClient client;
-	public bool client_alive;
     
 
     void Start() {
         client = ClientObject.GetComponent<SynchronousClient>();
-		client_alive = client.alive;
     }
 
     //void Awake()
@@ -21,7 +19,6 @@ public class Move : MonoBehaviour {
     //}
 
 	void FixedUpdate () {
-		client_alive = client.alive;
 		if (client.bombermans[client.PlayerIndex] != null) {
 			Vector2 dir = Vector2.zero;
 			if (Input.GetKey (KeyCode.UpArrow) || Input.GetKey (KeyCode.W)) {

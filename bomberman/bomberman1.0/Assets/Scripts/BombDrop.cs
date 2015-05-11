@@ -19,7 +19,7 @@ public class BombDrop : MonoBehaviour {
     public Move Character;
 	public SynchronousClient camera_sc;
 	public GameObject camera_object;
-
+ 
     void Start()
     {
         Character = mover.GetComponent<Move>();

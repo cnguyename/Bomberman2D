@@ -14,8 +14,6 @@ public class SynchronousClient : MonoBehaviour
     public int PlayerIndex;
     public static string strPlayerIndex;
 
-	public bool alive = true;
-
     public static string PlayerName;
 
     public GameObject bomberman;
@@ -285,9 +283,6 @@ public class SynchronousClient : MonoBehaviour
             {
                 bombermans[i].transform.position = positions[i];
             }
-			if(bombermans[i] == null){
-				alive = false;
-			}
         }
 		if (bomb_set_off) {
 			Instantiate (bomb_prefab, bomb_position, Quaternion.identity);

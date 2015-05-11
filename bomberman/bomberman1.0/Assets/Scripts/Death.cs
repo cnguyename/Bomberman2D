@@ -57,7 +57,7 @@ public class Death : MonoBehaviour {
         {
             source.PlayOneShot(bomb_powerup);
             other.gameObject.SetActive(false);
-            bombtracker.bomb_limit += 1;
+			bombtracker.bomb_limit += 1;
         }
     }
   
