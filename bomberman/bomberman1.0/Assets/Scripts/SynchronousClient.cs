@@ -11,31 +11,34 @@ using System.Threading;
 
 public class SynchronousClient : MonoBehaviour
 {
-
-    //Player Index (of array)
-    //Player 1, 2, 3, 4 = index 0, 1, 2, 3 respectively.
     public int PlayerIndex;
-
     public static string strPlayerIndex;
+
+	public bool alive = true;
 
     public static string PlayerName;
 
     public GameObject bomberman;
 
     public GameObject[] bombermans;
-    public GameObject bman1;
-    public GameObject bman2;
-    public GameObject bman3;
-    public GameObject bman4;
+    public GameObject bman1; public GameObject bman2; public GameObject bman3; public GameObject bman4;
     public Animator anim;
     public AudioSource source;
 
-	public GameObject bomb_client_prefab;
     //hold position updates for bomberman clients
     public static Vector3[] positions = new Vector3[4]; 
 
+	//position of new bomb
+	
+	public static Vector3 bomb_position = new Vector3();
+
+	//for making the bomb from server to client
+	public GameObject bomb_prefab;
+	public static bool bomb_set_off = false;
 	
 	public static Queue<Vector2> q_of_bombs = new Queue<Vector2>();
+
+
 
     //what needs to be sent over unity?
     //players movement + position, bomb placements, map updates, powerups, score
@@ -43,11 +46,9 @@ public class SynchronousClient : MonoBehaviour
     public class SynchronousSocketClient
     {
         public Socket sender;
-		public GameObject b_prefab;
 
-        public SynchronousSocketClient(GameObject go)
+        public SynchronousSocketClient()
         {
-			b_prefab = go;
         }
 
         public void StartClient()
@@ -88,7 +89,7 @@ public class SynchronousClient : MonoBehaviour
                                       Encoding.ASCII.GetString(bytes, 0, bytesRec));
                     strPlayerIndex = Encoding.ASCII.GetString(bytes, 0, bytesRec);
 
-                    MessageListener ml = new MessageListener(sender, b_prefab);
+                    MessageListener ml = new MessageListener(sender);
                     Thread t = new Thread(new ThreadStart(ml.ReceivingThread));
                     t.Start();
 
@@ -129,14 +130,13 @@ public class SynchronousClient : MonoBehaviour
         Queue dataQ = new Queue();
         AutoResetEvent lock_thread = new AutoResetEvent(false);
         char playernum;
-		GameObject bomb_prefab;
+		Vector3 b_pos;
 
 
-        public MessageListener(Socket s, GameObject go)
+        public MessageListener(Socket s)
         {
             sender = s;
             playernum = strPlayerIndex[0];
-			bomb_prefab = go;
         }
 
         //blocking collection
@@ -151,8 +151,6 @@ public class SynchronousClient : MonoBehaviour
 
                 dataQ.Enqueue(data);
                 lock_thread.Set();
-
-
             }
         }
 
@@ -167,31 +165,37 @@ public class SynchronousClient : MonoBehaviour
                 lock_thread.WaitOne();
                 string msg = (string)dataQ.Dequeue();
                 //check if playerindex is not equal to this clients playerindex
+				
+				string[] split_msg = msg.Split(new char[] { '/', '(', ')', ',' });
+
              
-				if (msg[0] != playernum && msg != " has successfully connected<EOF>" && msg[1] != 'B')
+				if (msg[0] != playernum && msg != " has successfully connected<EOF>" && msg[2] != 'B')
                 {
                     //split up the message
-                    string[] split = msg.Split(new Char[] { '/', '(', ')', ',' });
+					
+					string[] split = msg.Split(new Char[] { '/', '(', ')', ',' });
                     //get x,y,z to create vector 3
                     pos.x = Single.Parse(split[1].Trim());
                     pos.y = Single.Parse(split[2].Trim());
                     pos.z = Single.Parse(split[3].Trim());
-                    print(pos);
                     //store new position into positions array
                     positions[Convert.ToInt32(split[0])] = pos;
                     
                 }
 
-				if(msg[0] != playernum && msg[1] == 'B'){
-					string[] split = msg.Split(new Char[] { '/', '(', ')', ',' });
-					Vector2 bomb_pos = new Vector2(Single.Parse (split[2].Trim()), Single.Parse (split[3].Trim()));
-					Vector3 bomb_position = new Vector3(bomb_pos.x, bomb_pos.y, 0);
-					GameObject.Instantiate(bomb_prefab, bomb_position, Quaternion.identity);
+				//obtaining a bomb_position
+				if(msg[0] != playernum && msg[2] == 'B'){
+					string[] sp = msg.Split(new Char[] { '/', '(', ')', ',' });
+					Vector3 bomb_pos = new Vector3(Single.Parse (sp[2].Trim()), Single.Parse (sp[3].Trim()), 0);
+					bomb_position = bomb_pos;
+					bomb_set_off = true;
 				}
             }
         }
     }
 
+
+	//Synchronous Client class mv's
     public SynchronousSocketClient synch_client;
     public Vector2 self_position;
     public float self_x, self_y, self_z;
@@ -209,7 +213,7 @@ public class SynchronousClient : MonoBehaviour
 
 
 
-        synch_client = new SynchronousSocketClient(bomb_client_prefab);
+        synch_client = new SynchronousSocketClient();
         synch_client.StartClient();
         //check x, y, z
         // <0
@@ -255,10 +259,9 @@ public class SynchronousClient : MonoBehaviour
     public int timer = 0;
     public float curr_x, curr_y, curr_z;
 
-
     void Update()
     {
-        if (timer % 5 == 0)
+        if (timer % 5 == 0 && bomberman != null)
         {
             Vector2 current_position = bomberman.transform.position;
             curr_x = bomberman.transform.position.x;
@@ -278,18 +281,17 @@ public class SynchronousClient : MonoBehaviour
         //update positions for other bombermans
         for (int i = 0; i < 4; ++i)
         {
-            if (i != PlayerIndex)
+            if (i != PlayerIndex && bombermans[i] != null)
             {
                 bombermans[i].transform.position = positions[i];
-
             }
+			if(bombermans[i] == null){
+				alive = false;
+			}
         }
-		/*
-		if (q_of_bombs.Count != 0) {
-			Vector2 bomb_p = q_of_bombs.Dequeue ();
-			Vector3 bomb_position = new Vector3(bomb_p.x, bomb_p.y, 0);
-			Instantiate(bomb_client_prefab, bomb_position, Quaternion.identity);
+		if (bomb_set_off) {
+			Instantiate (bomb_prefab, bomb_position, Quaternion.identity);
+			bomb_set_off = false;
 		}
-		*/
     }
 }
