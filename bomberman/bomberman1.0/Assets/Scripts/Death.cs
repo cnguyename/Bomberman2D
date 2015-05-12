@@ -20,7 +20,7 @@ public class Death : MonoBehaviour {
 	void Start () {
         Character = mover.GetComponent<Move>();
         source = GetComponent<AudioSource>();
-        bombtracker = mover.bombermans[Character.client.PlayerIndex].GetComponent<BombDrop>();
+//        bombtracker = mover.bombermans[Character.client.PlayerIndex].GetComponent<BombDrop>();
         //bombtracker.bomb_limit += 1;
 	}
 	
@@ -57,7 +57,7 @@ public class Death : MonoBehaviour {
         {
             source.PlayOneShot(bomb_powerup);
             other.gameObject.SetActive(false);
-            bombtracker.bomb_limit += 1;
+			bombtracker.bomb_limit += 1;
         }
     }
   

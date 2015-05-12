@@ -17,8 +17,8 @@ public class Login : MonoBehaviour
     public string CurrentMenu = "Login";
 
     //Private
-    private string CreateAccountUrl = "http://127.0.0.1/CreateAccountT.php";
-    private string LoginUrl = "http://127.0.0.1/LoginAccountT.php";
+	private string CreateAccountUrl = "http://169.234.58.129/CreateAccountT.php";
+	private string LoginUrl = "http://169.234.58.129/LoginAccountT.php";
 
     private string ConfirmPass = "";
     private string Cusername = ""; //New
@@ -146,7 +146,8 @@ public class Login : MonoBehaviour
             string[] LogTextSplit = LogText.Split(':');
             if (LogTextSplit[0] == "Success")
             {
-                Application.LoadLevel("Corey_Scene"); // SELECT LEVEL after successfully login
+				SynchronousClient.PlayerName = username;
+                Application.LoadLevel("scene_main"); // SELECT LEVEL after successfully login
             }
         }
     }
