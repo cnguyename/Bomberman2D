@@ -13,10 +13,6 @@ public class Move : MonoBehaviour {
         client = ClientObject.GetComponent<SynchronousClient>();
     }
 
-    //void Awake()
-    //{
-    //    source = bombermans[client.PlayerIndex].GetComponent<AudioSource>();
-    //}
 
 	void FixedUpdate () {
 		if (client.bombermans[client.PlayerIndex] != null) {

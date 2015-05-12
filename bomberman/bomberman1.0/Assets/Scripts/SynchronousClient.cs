@@ -60,8 +60,8 @@ public class SynchronousClient : MonoBehaviour
                 // Establish the remote endpoint for the socket.
                 // This example uses port 11000 on the local computer.
                 IPHostEntry ipHostInfo = Dns.Resolve(Dns.GetHostName());
-                IPAddress ipAddress = IPAddress.Parse("192.168.1.13");
-                //IPAddress ipAddress = ipHostInfo.AddressList[0];
+                //IPAddress ipAddress = IPAddress.Parse("192.168.1.13");
+                IPAddress ipAddress = ipHostInfo.AddressList[0];
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
 
                 // Create a TCP/IP  socket.
@@ -197,18 +197,18 @@ public class SynchronousClient : MonoBehaviour
     public SynchronousSocketClient synch_client;
     public Vector2 self_position;
     public float self_x, self_y, self_z;
+	public Animator[] animations;
+
 
     // Use this for initialization
     void Start()
     {
-        
-
-        bombermans = new GameObject[4];
+		
+		bombermans = new GameObject[4];
         bombermans[0] = bman1;
         bombermans[1] = bman2;
         bombermans[2] = bman3;
         bombermans[3] = bman4;
-
 
 
         synch_client = new SynchronousSocketClient();
@@ -252,23 +252,31 @@ public class SynchronousClient : MonoBehaviour
         {
             positions[i] = bombermans[i].transform.position;
         }
-    }
+		animations = new Animator[4];
+		animations[0] = bman1.GetComponent<Animator>();
+		animations[1] = bman2.GetComponent<Animator>();
+		animations[2] = bman3.GetComponent<Animator>();
+		animations[3] = bman4.GetComponent<Animator>();
+	}
+	
+	public int timer = 0;
+	public float curr_x, curr_y;
+	public float curr_ox, curr_oy;
 
-    public int timer = 0;
-    public float curr_x, curr_y, curr_z;
 
     void Update()
     {
         if (timer % 5 == 0 && bomberman != null)
         {
-            Vector2 current_position = bomberman.transform.position;
+            //Vector2 current_position = bomberman.transform.position;
             curr_x = bomberman.transform.position.x;
             curr_y = bomberman.transform.position.y;
-            if (Math.Abs(self_x - curr_x) > .1 || Math.Abs(self_y - curr_y) > .1 || Math.Abs(self_z - curr_z) > .1)
+            if (Math.Abs(self_x - curr_x) > .1 || Math.Abs(self_y - curr_y) > .1 )
             {
                 byte[] msg = Encoding.ASCII.GetBytes(PlayerIndex.ToString() + bomberman.transform.position.ToString() + "<EOF>");
                 synch_client.sender.Send(msg);
-                self_position = current_position;
+                //self_position = current_position;
+
                 self_x = curr_x;
                 self_y = curr_y;
             }
@@ -276,14 +284,35 @@ public class SynchronousClient : MonoBehaviour
         }
         timer++;
 
-        //update positions for other bombermans
+		for(int x = 0; x < 4; x++){
+			if( x != PlayerIndex && bombermans[x] != null){
+				curr_ox = bombermans[x].transform.position.x;
+				curr_oy = bombermans[x].transform.position.y;
+				
+				if ( (positions[x].y > curr_oy )) {
+					animations[x].SetInteger ("Direction", 0); // up
+				} else if ((positions[x].x > curr_ox )) {
+					animations[x].SetInteger ("Direction", 1); // right
+				} else if ((positions[x].y < curr_oy)) {
+					animations[x].SetInteger ("Direction", 2); // down
+				} else if ((positions[x].x < curr_ox)) {
+					animations[x].SetInteger ("Direction", 3); // left
+				} 
+			}
+		}
+		
+		//update positions for other bombermans
         for (int i = 0; i < 4; ++i)
         {
             if (i != PlayerIndex && bombermans[i] != null)
             {
-                bombermans[i].transform.position = positions[i];
-            }
+				if(bombermans[i].transform.position != positions[i])
+                	bombermans[i].transform.position = positions[i];
+			}
         }
+
+
+		
 		if (bomb_set_off) {
 			Instantiate (bomb_prefab, bomb_position, Quaternion.identity);
 			bomb_set_off = false;

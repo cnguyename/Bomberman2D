@@ -17,8 +17,8 @@ public class Login : MonoBehaviour
     public string CurrentMenu = "Login";
 
     //Private
-    private string CreateAccountUrl = "http://192.168.0.110/CreateAccountT.php";
-    private string LoginUrl = "http://192.168.0.110/LoginAccountT.php";
+	private string CreateAccountUrl = "http://169.234.58.129/CreateAccountT.php";
+	private string LoginUrl = "http://169.234.58.129/LoginAccountT.php";
 
     private string ConfirmPass = "";
     private string Cusername = ""; //New

@@ -47,7 +47,7 @@ public class ClientConnection
             // Show the data on the console.
             lock_thread.WaitOne();
             Console.WriteLine("Text received: {0}", dataQ.Peek());
-            if ((string)dataQ.Peek() == " has successfully connected<EOF>" && players_connected <= 3)
+            if (players_connected <= 3)
             {
                 //players_connected++;
                 byte[] player_index = Encoding.ASCII.GetBytes(players_connected.ToString() + "<EOF>");
