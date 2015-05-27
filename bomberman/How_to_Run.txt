@@ -1,0 +1,10 @@
+1. Start database (we used xampp)
+2. Go to Bomberman2D/bomberman/Server
+3. Run the ClientServer.sln and start it
+4. Open the project in unity and make sure you are on the “main_menu” scene and click play
+5. Click the “Start!” button
+6. Type in the Database/Server IP address
+7. Press Start!
+8. Create an account (If you don’t already have one)
+9. Type in account and password then click “Log In”
+IMPORTANT: Do not do any actions until all desired clients are connected.
