@@ -96,28 +96,28 @@ public class Bomb : MonoBehaviour {
             {
                 Instantiate(explosion, new Vector2(pos.x, pos.y + i), Quaternion.identity);
                 Block.destroyBlockAt(pos.x, pos.y + i);
-                SpawnPowerUp(pos.x, pos.y + i);
+                //SpawnPowerUp(pos.x, pos.y + i);
             }
             //right
             if (!right)
             {
                 Instantiate(explosion, new Vector2(pos.x + i, pos.y), Quaternion.identity);
                 Block.destroyBlockAt(pos.x + i, pos.y);
-                SpawnPowerUp(pos.x + i, pos.y);
+                //SpawnPowerUp(pos.x + i, pos.y);
             }
             //down
             if (!down)
             {
                 Instantiate(explosion, new Vector2(pos.x, pos.y - i), Quaternion.identity);
                 Block.destroyBlockAt(pos.x, pos.y - i);
-                SpawnPowerUp(pos.x, pos.y - i);
+                //SpawnPowerUp(pos.x, pos.y - i);
             }
             //left
             if (!left)
             {
                 Instantiate(explosion, new Vector2(pos.x - i, pos.y), Quaternion.identity);
                 Block.destroyBlockAt(pos.x - i, pos.y);
-                SpawnPowerUp(pos.x - i, pos.y);
+                //SpawnPowerUp(pos.x - i, pos.y);
             }
             destroyables = GameObject.FindGameObjectsWithTag("Destroyable");
 
