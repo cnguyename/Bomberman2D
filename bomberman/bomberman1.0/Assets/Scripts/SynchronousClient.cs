@@ -9,8 +9,25 @@ using System.Text;
 
 using System.Threading;
 
+using UnityEditor;
+
 public class SynchronousClient : MonoBehaviour
 {
+	public static string ip;
+
+    //booleans for connected characters
+    public static bool player1_disconnect = false;
+    public static bool player2_disconnect = false;
+    public static bool player3_disconnect = false;
+    public static bool player4_disconnect = false;
+
+    //booleans for alive characters
+    public static bool player1_alive = true;
+    public static bool player2_alive = true;
+    public static bool player3_alive = true;
+    public static bool player4_alive = true;
+
+
     public int PlayerIndex;
     public static string strPlayerIndex;
 
@@ -60,7 +77,7 @@ public class SynchronousClient : MonoBehaviour
                 // Establish the remote endpoint for the socket.
                 // This example uses port 11000 on the local computer.
                 IPHostEntry ipHostInfo = Dns.Resolve(Dns.GetHostName());
-                //IPAddress ipAddress = IPAddress.Parse("192.168.1.13");
+                //IPAddress ipAddress = IPAddress.Parse("169.234.47.119");
                 IPAddress ipAddress = ipHostInfo.AddressList[0];
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
 
@@ -166,8 +183,35 @@ public class SynchronousClient : MonoBehaviour
 				
 				string[] split_msg = msg.Split(new char[] { '/', '(', ')', ',' });
 
-             
-				if (msg[0] != playernum && msg != " has successfully connected<EOF>" && msg[2] != 'B')
+                //check player disconnects
+                if (msg[0] != playernum && msg[2] == 'X')
+                {
+                     // check if false??
+                    if (msg[0] == '0')
+                        player1_disconnect = true;
+                    else if (msg[0] == '1')
+                        player2_disconnect = true;
+                    else if (msg[0] == '2')
+                        player3_disconnect = true;
+                    else if (msg[0] == '3')
+                        player4_disconnect = true;
+                }
+
+                //check player death
+                if (msg[0] != playernum && msg[2] == 'D')
+                {
+                    if (msg[0] == '0')
+                        player1_alive = false;
+                    else if (msg[0] == '1')
+                        player2_alive = false;
+                    else if (msg[0] == '2')
+                        player3_alive = false;
+                    else if (msg[0] == '3')
+                        player4_alive = false;
+                }
+
+
+				if (msg[0] != playernum && msg != (PlayerName + " has successfully connected<EOF>") && msg[2] != 'B')
                 {
                     //split up the message
 					
@@ -198,6 +242,8 @@ public class SynchronousClient : MonoBehaviour
     public Vector2 self_position;
     public float self_x, self_y, self_z;
 	public Animator[] animations;
+
+	public int count = 0;
 
 
     // Use this for initialization
@@ -266,22 +312,75 @@ public class SynchronousClient : MonoBehaviour
 
     void Update()
     {
-        if (timer % 5 == 0 && bomberman != null)
+        //delete disconnected players?
+        if (player1_disconnect == true && bombermans[0] != null)
+        {
+            Destroy(bombermans[0]);
+            player1_disconnect = false; //set to false so we don't do the check again on something that doesn't exist
+        }
+        if (player2_disconnect == true && bombermans[1] != null)
+        {
+            Destroy(bombermans[1]);
+            //player2_disconnect = false;
+        }
+        if (player3_disconnect == true && bombermans[2] != null)
+        {
+            Destroy(bombermans[2]);
+            //player3_disconnect = false;
+        }
+        if (player4_disconnect == true && bombermans[3] != null)
+        {
+            Destroy(bombermans[3]);
+            //player4_disconnect = false;
+        }
+
+        if (player1_alive == false && bombermans[0] != null)
+        {
+            Destroy(bombermans[0]);
+        }
+        if (player2_alive == false && bombermans[1] != null)
+        {
+            Destroy(bombermans[1]);
+        }
+        if (player3_alive == false && bombermans[2] != null)
+        {
+            Destroy(bombermans[2]);
+        }
+        if (player4_alive == false && bombermans[3] != null)
+        {
+            Destroy(bombermans[3]);
+        }
+
+        if (timer % 2 == 0 && bomberman != null)
         {
             //Vector2 current_position = bomberman.transform.position;
             curr_x = bomberman.transform.position.x;
             curr_y = bomberman.transform.position.y;
-            if (Math.Abs(self_x - curr_x) > .1 || Math.Abs(self_y - curr_y) > .1 )
-            {
-                byte[] msg = Encoding.ASCII.GetBytes(PlayerIndex.ToString() + bomberman.transform.position.ToString() + "<EOF>");
-                synch_client.sender.Send(msg);
-                //self_position = current_position;
 
-                self_x = curr_x;
-                self_y = curr_y;
+            if (Math.Round(self_x,3) == Math.Round(curr_x,3) && Math.Round(self_y,3) == Math.Round(curr_y,3))//Math.Abs(self_x - curr_x) > .1 || Math.Abs(self_y - curr_y) > .1 )
+            {
+				//count++;
             }
+			else{
+				
+				byte[] msg = Encoding.ASCII.GetBytes(PlayerIndex.ToString() + bomberman.transform.position.ToString() + "<EOF>");
+				synch_client.sender.Send(msg);
+				//self_position = current_position;
+				
+				self_x = curr_x;
+				self_y = curr_y;
+
+				//count = 0;
+			}
             timer = 1;
         }
+
+        if (EditorApplication.isPlaying == false)
+        {
+            byte[] msg1 = Encoding.ASCII.GetBytes(PlayerIndex.ToString() + "Disconnect <EOF>");
+            synch_client.sender.Send(msg1);
+        }
+
         timer++;
 
 		for(int x = 0; x < 4; x++){

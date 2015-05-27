@@ -10,3 +10,8 @@ E:\Downloads\classdemo-master\Server\bin\Server.pdb
 E:\Downloads\classdemo-master\Server\Server\obj\x86\Debug\Server.csprojResolveAssemblyReference.cache
 C:\Users\Corey\Desktop\BomberMan2D\bomberman\Server\Server\obj\x86\Debug\Server.exe
 C:\Users\Corey\Desktop\BomberMan2D\bomberman\Server\Server\obj\x86\Debug\Server.pdb
+C:\Users\Corey\Documents\Bomberman2D\bomberman\Server\bin\Server.exe
+C:\Users\Corey\Documents\Bomberman2D\bomberman\Server\bin\Server.pdb
+C:\Users\Corey\Documents\Bomberman2D\bomberman\Server\Server\obj\x86\Debug\Server.csprojResolveAssemblyReference.cache
+C:\Users\Corey\Documents\Bomberman2D\bomberman\Server\Server\obj\x86\Debug\Server.exe
+C:\Users\Corey\Documents\Bomberman2D\bomberman\Server\Server\obj\x86\Debug\Server.pdb

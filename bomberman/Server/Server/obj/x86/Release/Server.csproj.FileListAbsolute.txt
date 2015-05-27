@@ -1,3 +1,6 @@
 C:\Users\corey\Desktop\Bomberman2D\bomberman\Server\bin\Server.exe
 C:\Users\corey\Desktop\Bomberman2D\bomberman\Server\Server\obj\x86\Release\Server.csprojResolveAssemblyReference.cache
 C:\Users\corey\Desktop\Bomberman2D\bomberman\Server\Server\obj\x86\Release\Server.exe
+C:\Users\Corey\Documents\Bomberman2D\bomberman\Server\bin\Server.exe
+C:\Users\Corey\Documents\Bomberman2D\bomberman\Server\Server\obj\x86\Release\Server.csprojResolveAssemblyReference.cache
+C:\Users\Corey\Documents\Bomberman2D\bomberman\Server\Server\obj\x86\Release\Server.exe

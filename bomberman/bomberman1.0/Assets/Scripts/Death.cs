@@ -1,6 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+
+
 public class Death : MonoBehaviour {
 
     public AudioSource source;
@@ -13,6 +19,8 @@ public class Death : MonoBehaviour {
     public GameObject mover;
 
     public Move Character;
+
+    public SynchronousClient camera_sc;
 
     public BombDrop bombtracker;
 
@@ -34,7 +42,11 @@ public class Death : MonoBehaviour {
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.tag == "Explosion")
-        {	
+        {
+            string name = gameObject.name;
+            
+            byte[] msg = Encoding.ASCII.GetBytes(name[10].ToString() + "," + "D" + "," + "<EOF>");
+            camera_sc.synch_client.sender.Send(msg);
             Destroy(gameObject);
         }
         if (other.gameObject.tag == "PickUpFlame")
