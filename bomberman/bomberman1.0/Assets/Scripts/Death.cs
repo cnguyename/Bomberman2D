@@ -44,9 +44,11 @@ public class Death : MonoBehaviour {
         if (other.tag == "Explosion")
         {
             string name = gameObject.name;
-            
-            byte[] msg = Encoding.ASCII.GetBytes(name[10].ToString() + "," + "D" + "," + "<EOF>");
-            camera_sc.synch_client.sender.Send(msg);
+            if (name[10] == camera_sc.PlayerIndex)
+            {
+                byte[] msg = Encoding.ASCII.GetBytes(name[10].ToString() + "," + "D" + "," + "<EOF>");
+                camera_sc.synch_client.sender.Send(msg);
+            }
             Destroy(gameObject);
         }
         if (other.gameObject.tag == "PickUpFlame")
