@@ -8,3 +8,4 @@
 8. Create an account (If you don’t already have one)
 9. Type in account and password then click “Log In”
 IMPORTANT: Do not do any actions until all desired clients are connected.
+NOTE: Must play in Unity Editor (Disconnect button/feature crashes in a Built Unity project).

@@ -44,24 +44,66 @@ public class ClientConnection
 
         while (true)
         {
-            // Show the data on the console.
-            lock_thread.WaitOne();
-            Console.WriteLine("Text received: {0}", dataQ.Peek());
-            if (players_connected <= 3)
+            try
             {
-                //players_connected++;
-                byte[] player_index = Encoding.ASCII.GetBytes(players_connected.ToString() + "<EOF>");
-                handler.Send(player_index);
-                Console.WriteLine(players_connected);
+                // Show the data on the console.
+                lock_thread.WaitOne();
+                Console.WriteLine("Text received: {0}", dataQ.Peek());
+                if (players_connected <= 3)
+                {
+                    //players_connected++;
+                    byte[] player_index = Encoding.ASCII.GetBytes(players_connected.ToString() + "<EOF>");
+                    handler.Send(player_index);
+                    Console.WriteLine(players_connected);
 
+                }
+                // Echo the data back to the client.
+                string byte_str = (string)dataQ.Dequeue();
+
+                if (byte_str.Length > 3)
+                {
+                    Console.WriteLine("WE ARE HERE");
+                    if (byte_str[0] == '0' && byte_str[2] == 'X')
+                    {
+                        list_of_clients[0].Shutdown(SocketShutdown.Both);
+                        list_of_clients[0] = null;
+                    }
+                    else if (byte_str[0] == '1' && byte_str[2] == 'X')
+                    {
+                        list_of_clients[1].Shutdown(SocketShutdown.Both);
+                        list_of_clients[1] = null;
+                    }
+                    else if (byte_str[0] == '2' && byte_str[2] == 'X')
+                    {
+                        list_of_clients[2].Shutdown(SocketShutdown.Both);
+                        list_of_clients[2] = null;
+                    }
+                    else if (byte_str[0] == '3' && byte_str[2] == 'X')
+                    {
+                        list_of_clients[3].Shutdown(SocketShutdown.Both);
+                        list_of_clients[3] = null;
+                    }
+
+
+                }
+
+                byte[] msg = Encoding.ASCII.GetBytes(byte_str); //change data string to bytes for the message
+                //handler.Send(msg); // send the bytes
+
+
+
+                foreach (Socket s in list_of_clients)
+                {
+                    if (s != null)
+                    {
+                        s.Send(msg);
+                    }
+
+                }
             }
-            // Echo the data back to the client.
-            string byte_str = (string)dataQ.Dequeue();
-            byte[] msg = Encoding.ASCII.GetBytes(byte_str); //change data string to bytes for the message
-            //handler.Send(msg); // send the bytes
-            foreach (Socket s in list_of_clients)
+            catch (Exception e)
             {
-                s.Send(msg);
+                Console.WriteLine(e.ToString());
             }
         }
     }

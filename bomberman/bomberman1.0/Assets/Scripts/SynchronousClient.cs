@@ -77,8 +77,8 @@ public class SynchronousClient : MonoBehaviour
                 // Establish the remote endpoint for the socket.
                 // This example uses port 11000 on the local computer.
                 IPHostEntry ipHostInfo = Dns.Resolve(Dns.GetHostName());
-                IPAddress ipAddress = IPAddress.Parse(ip);
-                //IPAddress ipAddress = ipHostInfo.AddressList[0];
+                //IPAddress ipAddress = IPAddress.Parse(ip);
+                IPAddress ipAddress = ipHostInfo.AddressList[0];
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
 
                 // Create a TCP/IP  socket.
