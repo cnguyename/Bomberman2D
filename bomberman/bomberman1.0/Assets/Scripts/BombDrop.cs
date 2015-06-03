@@ -19,7 +19,7 @@ public class BombDrop : MonoBehaviour {
     public Move Character;
 	public SynchronousClient camera_sc;
 	public GameObject camera_object;
- 
+
     void Start()
     {
         Character = mover.GetComponent<Move>();
@@ -33,6 +33,7 @@ public class BombDrop : MonoBehaviour {
             pos.x = Mathf.Round(pos.x);
             pos.y = Mathf.Round(pos.y);
             Instantiate(bombPrefab, pos, Quaternion.identity);
+
 			byte[] msg = Encoding.ASCII.GetBytes( camera_sc.PlayerIndex.ToString() +"," + "B" + pos.ToString() + "<EOF>");
 			camera_sc.synch_client.sender.Send(msg);
         }

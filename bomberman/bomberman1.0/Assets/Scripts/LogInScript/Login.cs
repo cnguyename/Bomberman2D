@@ -3,6 +3,8 @@ using System.Collections;
 
 public class Login : MonoBehaviour
 {
+	//Static IP
+	public static string ip;
 
     //Static
     public static string username = "";
@@ -17,8 +19,8 @@ public class Login : MonoBehaviour
     public string CurrentMenu = "Login";
 
     //Private
-	private string CreateAccountUrl = "http://169.234.58.129/CreateAccountT.php";
-	private string LoginUrl = "http://169.234.58.129/LoginAccountT.php";
+	private string CreateAccountUrl = "http://" + ip + "/CreateAccountT.php";
+	private string LoginUrl = "http://" + ip + "/LoginAccountT.php";
 
     private string ConfirmPass = "";
     private string Cusername = ""; //New
@@ -45,38 +47,38 @@ public class Login : MonoBehaviour
 
     void LoginGUI()
     {
-        GUI.Box(new Rect(280, 120, (Screen.width / 4) + 200, (Screen.height / 4) + 250), "Login");
+		GUI.Box(new Rect(Screen.width/5, Screen.height/5, Screen.width/2, Screen.height/2), "Login");
 
-        if (GUI.Button(new Rect(370, 360, 120, 25), "Create Account"))
+		if (GUI.Button(new Rect(Screen.width/5 + 20, Screen.height/2 + 50, 120, 25), "Create Account"))
         {
             CurrentMenu = "CreateAccount";
         }
-        if (GUI.Button(new Rect(520, 360, 120, 25), "Log In"))
+		if (GUI.Button(new Rect(Screen.width/5 + 160, Screen.height/2 + 50, 120, 25), "Log In"))
         {
             StartCoroutine(LoginAccount());
         }
-        GUI.Label(new Rect(390, 200, 220, 23), "Account: ");
-        username = GUI.TextField(new Rect(390, 225, 220, 23), username);
+		GUI.Label(new Rect(Screen.width/5 + 20, Screen.height/5 + 20, Screen.width/2, Screen.height/2), "Account: ");
+		username = GUI.TextField(new Rect(Screen.width/5 + 20, Screen.height/5 + 40, 220, 23), username);
 
-        GUI.Label(new Rect(390, 255, 220, 23), "Password: ");
-        password = GUI.TextField(new Rect(390, 280, 220, 23), password);
+		GUI.Label(new Rect(Screen.width/5 + 20, Screen.height/5 + 65, Screen.width/2, Screen.height/2), "Password: ");
+		password = GUI.TextField(new Rect(Screen.width/5 + 20, Screen.height/5 + 85, 220, 23), password);
 
     }
 
     void CreateAccountGUI()
     {
-        GUI.Box(new Rect(280, 120, (Screen.width / 4) + 200, (Screen.height / 4) + 250), "Create Account");
+		GUI.Box(new Rect(Screen.width/5, Screen.height/5, Screen.width/2, Screen.height/2), "Create Account");
 
-        GUI.Label(new Rect(390, 200, 220, 23), "New Account: ");
-        Cusername = GUI.TextField(new Rect(390, 225, 220, 23), Cusername);
+		GUI.Label(new Rect(Screen.width/5 + 20, Screen.height/5 + 20, Screen.width/2, Screen.height/2), "New Account: ");
+		Cusername = GUI.TextField(new Rect(Screen.width/5 + 20, Screen.height/5 + 40, 220, 23), Cusername);
 
-        GUI.Label(new Rect(390, 255, 220, 23), "New Password: ");
-        Cpassword = GUI.TextField(new Rect(390, 280, 220, 23), Cpassword);
+		GUI.Label(new Rect(Screen.width/5 + 20, Screen.height/5 + 65, Screen.width/2, Screen.height/2), "New Password: ");
+		Cpassword = GUI.TextField(new Rect(Screen.width/5 + 20, Screen.height/5 + 85, 220, 23), Cpassword);
 
-        GUI.Label(new Rect(390, 310, 220, 23), "Confirm Password: ");
-        ConfirmPass = GUI.TextField(new Rect(390, 335, 220, 23), ConfirmPass);
+		GUI.Label(new Rect(Screen.width/5 + 20, Screen.height/5 + 110, Screen.width/2, Screen.height/2), "Confirm Password: ");
+		ConfirmPass = GUI.TextField(new Rect(Screen.width/5 + 20, Screen.height/5 + 130, 220, 23), ConfirmPass);
 
-        if (GUI.Button(new Rect(370, 460, 120, 25), "Create Account"))
+		if (GUI.Button(new Rect(Screen.width/5 + 20, Screen.height/2 + 50, 120, 25), "Create Account"))
         {
             if (ConfirmPass == Cpassword && Cusername != null)
             {
@@ -87,7 +89,7 @@ public class Login : MonoBehaviour
                 //StartCoroutine(); // ''
             }
         }
-        if (GUI.Button(new Rect(520, 460, 120, 25), "Back"))
+		if (GUI.Button(new Rect(Screen.width/5 + 160, Screen.height/2 + 50, 120, 25), "Back"))
         {
             CurrentMenu = "Login";
         }
@@ -147,21 +149,9 @@ public class Login : MonoBehaviour
             if (LogTextSplit[0] == "Success")
             {
 				SynchronousClient.PlayerName = username;
-                Application.LoadLevel("scene_main"); // SELECT LEVEL after successfully login
+                Application.LoadLevel("GameSession"); // SELECT LEVEL after successfully login
             }
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
