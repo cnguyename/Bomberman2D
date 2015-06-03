@@ -31,7 +31,8 @@ public class Bomb : MonoBehaviour {
     public GameObject[] destroyables;
     public float rnd;
 
-	
+
+
     void Start()
     {
         destroyables = GameObject.FindGameObjectsWithTag("Destroyable");
@@ -78,9 +79,10 @@ public class Bomb : MonoBehaviour {
         Vector2 pos = transform.position;
         Instantiate(explosion,transform.position, Quaternion.identity);
         Block.destroyBlockAt(pos.x, pos.y);
+        Debug.Log(count);
         for (int i = 1; i <= count; i++)
         {
-            //Debug.Log(count);
+            Debug.Log(count);
 			//up,right,down, and then left:
 			if(Block.indestructibleBlockAt(pos.x, pos.y + i))
 				up = true;

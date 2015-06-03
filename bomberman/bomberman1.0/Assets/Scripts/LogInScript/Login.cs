@@ -148,8 +148,8 @@ public class Login : MonoBehaviour
             string[] LogTextSplit = LogText.Split(':');
             if (LogTextSplit[0] == "Success")
             {
-				//SynchronousClient.PlayerName = username;
-                Application.LoadLevel("scene_main"); // SELECT LEVEL after successfully login
+				SynchronousClient.PlayerName = username;
+                Application.LoadLevel("GameSession"); // SELECT LEVEL after successfully login
             }
         }
     }

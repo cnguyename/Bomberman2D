@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-using UnityEditor;
+//using UnityEditor;
 public class DisconnectButton : MonoBehaviour {
 
 
@@ -16,7 +16,7 @@ public class DisconnectButton : MonoBehaviour {
     {
         byte[] msg = Encoding.ASCII.GetBytes(camera_sc.PlayerIndex.ToString() + "," + "X" +"," + "<EOF>");
         camera_sc.synch_client.sender.Send(msg);
-        EditorApplication.isPlaying = false;
+        //EditorApplication.isPlaying = false;
         Application.Quit();
     }
 	// Use this for initialization

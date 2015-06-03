@@ -7,12 +7,17 @@ public class Move : MonoBehaviour {
     public GameObject ClientObject;
 
     public SynchronousClient client;
+	public bool client_alive;
     
 
     void Start() {
         client = ClientObject.GetComponent<SynchronousClient>();
     }
 
+    //void Awake()
+    //{
+    //    source = bombermans[client.PlayerIndex].GetComponent<AudioSource>();
+    //}
 
 	void FixedUpdate () {
 		if (client.bombermans[client.PlayerIndex] != null) {
