@@ -1,11 +1,30 @@
 1. Start database (we used xampp)
+	Database instructions:
+	1) Download Xampp and Install
+	2) Copy CreateAccountT.php and LoginAccountT.php, then paste it into the folder
+	called htdocs (c:/xampp/htdocs)
+	3) Run Xampp Control Panel as Administrator (idk about MAC)
+	4) Check service for Apache and MySQL and Start
+		%% Do not turn it off
+	5) Type '127.0.0.1/phpmyadmin' or 'localhost/phpmyadmin' in your browser
+	6) Create database: name it as 'accounts'
+	7)  Set Number of columns to 2
+	8) Name 1st column 'Account' and 2nd colmn 'Password'
+		%% Case-sensitive
+	9) Set Types for both column as 'VARCHAR'
+	10) Set Length/Values - 50
+	11) Test Log-in and Create Account from Unity.
+
 2. Go to Bomberman2D/bomberman/Server
-3. Run the ClientServer.sln and start it
-4. Open the project in unity and make sure you are on the “main_menu” scene and click play
+3. Run the ClientServer.sln and start it. Alternatively there is an executable, either way you could compile/build the SynchronousClient.cs script to get the executable. 
+4. Open the project in unity (should be 5.0.1) and make sure you are on the “main_menu” scene and click play
 5. Click the “Start!” button
 6. Type in the Database/Server IP address
 7. Press Start!
 8. Create an account (If you don’t already have one)
 9. Type in account and password then click “Log In”
+10. A new scene will load and a field for a game session will pop up, type in a one word phrase for a game session. By default if you just hit the button it should put you in a game called default0.
+
 IMPORTANT: Do not do any actions until all desired clients are connected.
+
 NOTE: Must play in Unity Editor (Disconnect button/feature crashes in a Built Unity project).
